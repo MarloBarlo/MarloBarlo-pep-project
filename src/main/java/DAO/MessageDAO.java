@@ -93,13 +93,11 @@ public class MessageDAO {
 
         try {
             //SQL logic
-            String sql = "UPDATE Message SET posted_by= ?, message_text= ?, time_posted_epoch= ? WHERE message_id = ?;";
+            String sql = "UPDATE Message SET message_text= ? WHERE message_id = ?;";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             //PreparedStatement methods
-            preparedStatement.setInt(1, message.getPosted_by());
             preparedStatement.setString(2, message.getMessage_text());
-            preparedStatement.setLong(3, message.getTime_posted_epoch());
             preparedStatement.setInt(4, id);
 
             preparedStatement.executeUpdate();

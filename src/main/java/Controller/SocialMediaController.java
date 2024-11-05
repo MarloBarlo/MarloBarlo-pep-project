@@ -36,7 +36,6 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         initializeRoutes(app);
-        app.start(8080); // Start the server on port 8080
         return app; // Return the Javalin app object
     }
 
@@ -54,16 +53,16 @@ public class SocialMediaController {
         app.get("/messages", this::getAllMessages);
         
         // Get Message by ID Endpoint
-        app.get("/messages/:message_id", this::getMessageById);
+        app.get("/messages/{message_id}", this::getMessageById);
         
         // Delete Message Endpoint
-        app.delete("/messages/:message_id", this::deleteMessage);
+        app.delete("/messages/{message_id}", this::deleteMessage);
         
         // Update Message Endpoint
-        app.patch("/messages/:message_id", this::updateMessage);
+        app.patch("/messages/{message_id}", this::updateMessage);
         
         // Get Messages by User ID
-        app.get("/accounts/:account_id/messages", this::getMessagesByUserId);
+        app.get("/accounts/{account_id}/messages", this::getMessagesByUserId);
     }
 
 
@@ -71,9 +70,9 @@ public class SocialMediaController {
         try {
             Account account = objectMapper.readValue(ctx.body(), Account.class);
             Account createdAccount = accountService.register(account);
-            ctx.status(201).json(createdAccount); // Return created status
+            ctx.status(200).json(createdAccount); // Return created status
         } catch (IllegalArgumentException | JsonProcessingException e) {
-            ctx.status(400).result(e.getMessage());
+            ctx.status(400).body().toString();
         }
     }
 
@@ -83,7 +82,7 @@ public class SocialMediaController {
             Account loggedInAccount = accountService.login(account.getUsername(), account.getPassword());
             ctx.status(200).json(loggedInAccount);
         } catch (IllegalArgumentException | JsonProcessingException e) {
-            ctx.status(401).result(e.getMessage());
+            ctx.status(401).body().toString();
         }
     }
 
@@ -93,7 +92,7 @@ public class SocialMediaController {
             Message createdMessage = messageService.createMessage(message);
             ctx.status(200).json(createdMessage); // Return created status
         } catch (IllegalArgumentException | JsonProcessingException e) {
-            ctx.status(400).result(e.getMessage());
+            ctx.status(400).body().toString();
         }
     }
 
@@ -109,24 +108,25 @@ public class SocialMediaController {
             if (message != null) {
                 ctx.status(200).json(message); // Return the specific message
             } else {
-                ctx.status(404).result("Message not found");
+                ctx.status(200).body().toString();
             }
         } catch (NumberFormatException e) {
-            ctx.status(400).result("Invalid message ID");
+            ctx.status(400);
         }
     }
 
     private void deleteMessage(Context ctx) {
         try {
             int messageId = Integer.parseInt(ctx.pathParam("message_id"));
+            Message message = messageService.getMessageById(messageId);
             boolean deleted = messageService.deleteMessage(messageId);
-            if (deleted) {
-                ctx.status(200); // No content
-            } else {
-                ctx.status(404).result("Message not found");
+            if (deleted == true) {
+                ctx.status(200).json(message); // show deleted message
+            } else if (deleted = false){
+                ctx.status(200).body().toString(); // no message to delete
             }
         } catch (NumberFormatException e) {
-            ctx.status(400).result("Invalid message ID");
+            ctx.status(400);
         }
     }
 
@@ -138,7 +138,7 @@ public class SocialMediaController {
             Message message = messageService.updateMessage(updatedMessage);
             ctx.status(200).json(message); // Return the updated message
         } catch (IllegalArgumentException | JsonProcessingException e) {
-            ctx.status(400).result(e.getMessage());
+            ctx.status(400).body().toString();
         }
     }
 
@@ -148,7 +148,7 @@ public class SocialMediaController {
             List<Message> messages = messageService.getMessagesByUserId(accountId);
             ctx.status(200).json(messages); // Return messages for the specific user
         } catch (NumberFormatException e) {
-            ctx.status(400).result("Invalid account ID");
+            ctx.status(400).body().toString();
         }
     }
 

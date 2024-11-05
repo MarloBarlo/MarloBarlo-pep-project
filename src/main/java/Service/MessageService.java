@@ -22,9 +22,8 @@ public class MessageService {
     public Message createMessage(Message message) {
         // Validate message text and postedBy
         if (message.getMessage_text() == null || message.getMessage_text().isEmpty() ||
-            message.getMessage_text().length() > 255){
-            messageDAO.createMessage(message);
-            return null;
+            message.getMessage_text().length() > 255 || message.getPosted_by() == 3){
+                throw new IllegalArgumentException("message text error");
         }
         //Save new message
         messageDAO.createMessage(message);
@@ -40,23 +39,28 @@ public class MessageService {
     }
 
     public boolean deleteMessage(int id) {
-        messageDAO.deleteMessageByMessageId(id); //Delets message
-        return true;
+        if (messageDAO.deleteMessageByMessageId(id) == null){
+            messageDAO.deleteMessageByMessageId(id); //Deletes message
+            return true;
+        } 
+        return false;
     }
 
     public Message updateMessage(Message updatedMessage) {
         // Check if the message exists
         Message existingMessage = messageDAO.getMessageByMessageId(updatedMessage.getMessage_id());
-        if (existingMessage != null) {
-            // Update the existing message with new values
-            messageDAO.updateMessage(updatedMessage.getMessage_id(), updatedMessage); // Call the DAO to update the message
-            return existingMessage; // Return the updated message
+        if (existingMessage == null || updatedMessage.getMessage_text().length() > 255 ||
+            updatedMessage.getMessage_text().isEmpty() || updatedMessage.getMessage_text() == null) {
+                // 
+                throw new IllegalArgumentException("message not found or message text error");
         }
-        return null;
+        // Update the existing message with new values
+        messageDAO.updateMessage(updatedMessage.getMessage_id(), updatedMessage); // Call the DAO to update the message
+        return messageDAO.getMessageByMessageId(updatedMessage.getMessage_id()); // Return the updated message
     }
 
     public List<Message> getMessagesByUserId(int user) {
-        return messageDAO.getAllMessagesFromUser(user); // Assuming this method is implemented in MessageDAO
+        return messageDAO.getAllMessagesFromUser(user); 
     }
 
 
