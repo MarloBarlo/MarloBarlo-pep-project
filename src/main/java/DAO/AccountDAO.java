@@ -38,16 +38,12 @@ public class AccountDAO {
 
         try {
             //SQL logic
-            String sql = "INSERT INTO Account (username, password) values (?, ?) WHERE NOT EXISTS(SELECT * FROM Account WHERE username = ? AND password =?) AND WHERE LEN(?) >= 4 AND WHERE ? != null;";
+            String sql = "INSERT INTO Account (username, password) values (?, ?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             //PreparedStatement methods
             preparedStatement.setString(1, account.getUsername());
             preparedStatement.setString(2, account.getPassword());
-            preparedStatement.setString(3, account.getUsername());
-            preparedStatement.setString(4, account.getPassword());
-            preparedStatement.setString(5, account.getPassword());
-            preparedStatement.setString(6, account.getUsername());
 
             preparedStatement.executeUpdate();
         }catch(SQLException e){
@@ -94,6 +90,25 @@ public class AccountDAO {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    public boolean doesUserExist(int userId) {
+        Connection connection = ConnectionUtil.getConnection();
+
+        try {
+            String sql = "SELECT COUNT(*) FROM Account WHERE account_id = ?;";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setInt(1, userId);
+
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                return rs.getInt(1) > 0; // Return true if user exists
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return false; // User does not exist
     }
 
     public Account deleteAccount(int id){

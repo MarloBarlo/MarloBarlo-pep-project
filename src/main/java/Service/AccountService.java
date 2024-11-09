@@ -18,7 +18,7 @@ public class AccountService {
         this.accountDAO = accountDAO;
     }
 
-    public Account register(Account account) {
+    public Boolean register(Account account) {
         // Validate account data before creating
         if (account.getUsername() == null || account.getUsername().isEmpty() ||
             account.getPassword() == null || account.getPassword().length() < 4) {
@@ -31,7 +31,7 @@ public class AccountService {
         }
         // Creates account if all checks pass SQL also checks for all the exceptions for saftey
         accountDAO.createAccount(account);
-        return account;
+        return true;
     }
 
     public Account login(String username, String password) {
@@ -46,6 +46,10 @@ public class AccountService {
 
     public List<Account> getAllAccounts() {
         return accountDAO.getAllAccounts();
+    }
+
+    public Account getAccountByUsername(String user) {
+        return accountDAO.getAccountByUsername(user);
     }
 
     public boolean deleteAccount(int id) {

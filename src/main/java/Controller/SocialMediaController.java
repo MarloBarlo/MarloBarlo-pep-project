@@ -69,7 +69,8 @@ public class SocialMediaController {
     private void registerUser (Context ctx) {
         try {
             Account account = objectMapper.readValue(ctx.body(), Account.class);
-            Account createdAccount = accountService.register(account);
+            accountService.register(account);
+            Account createdAccount = accountService.getAccountByUsername(account.getUsername());
             ctx.status(200).json(createdAccount); // Return created status
         } catch (IllegalArgumentException | JsonProcessingException e) {
             ctx.status(400).body().toString();
@@ -89,7 +90,8 @@ public class SocialMediaController {
     private void createMessage(Context ctx) {
         try {
             Message message = objectMapper.readValue(ctx.body(), Message.class);
-            Message createdMessage = messageService.createMessage(message);
+            messageService.createMessage(message);
+            Message createdMessage = messageService.getMessageByText(message.getMessage_text());
             ctx.status(200).json(createdMessage); // Return created status
         } catch (IllegalArgumentException | JsonProcessingException e) {
             ctx.status(400).body().toString();
@@ -123,7 +125,7 @@ public class SocialMediaController {
             if (deleted == true) {
                 ctx.status(200).json(message); // show deleted message
             } else if (deleted = false){
-                ctx.status(200).body().toString(); // no message to delete
+                ctx.status(200).body(); // no message to delete
             }
         } catch (NumberFormatException e) {
             ctx.status(400);
@@ -135,7 +137,8 @@ public class SocialMediaController {
             int messageId = Integer.parseInt(ctx.pathParam("message_id"));
             Message updatedMessage = objectMapper.readValue(ctx.body(), Message.class);
             updatedMessage.setMessage_id(messageId); // Ensure the ID is set for the update
-            Message message = messageService.updateMessage(updatedMessage);
+            messageService.updateMessage(updatedMessage);
+            Message message = messageService.getMessageById(messageId);
             ctx.status(200).json(message); // Return the updated message
         } catch (IllegalArgumentException | JsonProcessingException e) {
             ctx.status(400).body().toString();
